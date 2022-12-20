@@ -1,8 +1,8 @@
 version: '2'
+
 services:
   ddosultraprotect:
-    build: 
-      context: ./main
-    image: myimage
+    build: ./main
+    container_name: test
     ports:
-      - "8080:8080"
+      - 8080:8080
