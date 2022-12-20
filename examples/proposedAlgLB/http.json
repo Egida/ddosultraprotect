@@ -1,0 +1,13 @@
+{
+  "server": {
+    "port": 80
+  },
+  "database": {
+    "type": "sqlite3",
+    "connection": "data/ghz.db"
+  },
+  "log": {
+    "level": "info",
+    "path": "/tmp/ghz.log"
+  }
+}
