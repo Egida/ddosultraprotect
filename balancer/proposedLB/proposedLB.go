@@ -14,8 +14,8 @@ import (
 // Name taken from rr example
 const Name = "proposedLB"
 
-const smallestCPUsize = 8
-const totalCPUsize = 32
+const smallestCPUsize = 4
+const totalCPUsize = 12
 const capacity = float64(60 / 100)
 
 const growthFactor = float64(12 / 100)
@@ -23,7 +23,7 @@ const growthFactor = float64(12 / 100)
 // initialize variables before calling functions which will change the values
 var numItemsInBucket = 0
 
-var numBalancersNeeded = 0
+var numConnections = 0
 
 // taken from rr example
 var logger = grpclog.Component("proposedLB")
@@ -58,7 +58,7 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		Count: int64(len(info.ReadySCs)),
 	}
 
-	for k := 1; k <= len(info.ReadySCs); k++ {
+	for k := range intervals.Buckets {
 		// for each bucket in the histogram, obtain the number of items needed
 		numItemsInBucket = int(intervals.Buckets[k].Count)
 
@@ -66,24 +66,24 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		if capacity > 0 && totalCPUsize > 0 && totalCPUsize%smallestCPUsize == 0 {
 			// most important line of code
 			if numItemsInBucket > int(capacity*float64(len(info.ReadySCs))) {
-				numBalancersNeeded = numItemsInBucket * smallestCPUsize / int(growthFactor*capacity*float64(totalCPUsize))
+				numConnections = numItemsInBucket * smallestCPUsize / int(growthFactor*capacity*float64(totalCPUsize))
 			} else {
-				numBalancersNeeded = numItemsInBucket * (totalCPUsize / smallestCPUsize)
+				numConnections = numItemsInBucket * (totalCPUsize / smallestCPUsize)
 			}
 
 		} else {
-			numBalancersNeeded = 0
+			numConnections = 0
 		}
 
 		if len(info.ReadySCs) == 0 {
 			return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
 		}
 	}
-	var scs = make([]balancer.SubConn, 0, numBalancersNeeded)
+	var scs = make([]balancer.SubConn, 0, numConnections)
 
 	return &newlbPicker{
 		subConns: scs,
-		next:     uint32(rand.Intn(numBalancersNeeded)),
+		next:     uint32(rand.Intn(len(info.ReadySCs))),
 	}
 }
 
