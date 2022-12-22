@@ -26,5 +26,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 )
 
-replace google.golang.org/grpc => ../
+// replace google.golang.org/grpc => ../
 
