@@ -1,8 +1,0 @@
-version: '2'
-services:
-  ddosultraprotect:
-    build: 
-      context: ./main
-    image: myimage
-    ports:
-      - "8080:8080"
