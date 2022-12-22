@@ -1,4 +1,4 @@
-module gihub.com/meldyer1/ddosultraprotect/examples
+module github.com/meldyer1/ddosultraprotect/examples
 
 go 1.17
 
@@ -10,6 +10,8 @@ require (
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
 )
+
+require "github.com/meldyer1/ddosultraprotect"
 
 require (
 	cloud.google.com/go/compute v1.12.1 // indirect
