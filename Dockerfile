@@ -7,19 +7,19 @@ RUN mkdir ../home/app
 WORKDIR /../home/app
 COPY . .
 
-
 RUN git config --global url.git@github.com:.insteadOf https://github.com/
 
 RUN GIT_TERMINAL_PROMPT=1 \
     GOARCH=amd64 \
-    GOOS=windows \
+    GOOS=linux \
     CGO_ENABLED=0 \
-    go build --installsuffix 'static' -o app
+    go build --installsuffix 'static' -o /my-app
 
-WORKDIR /../home/app
+FROM alpine:3.14 
 
-COPY ./go.mod ./proposedAlgLB/server/go.mod
-
-COPY ./go.sum ./proposedAlgLB/server/go.sum
+COPY --from=builder /my-app /
 
 EXPOSE 50051
+
+CMD ["/my-app"]
+
