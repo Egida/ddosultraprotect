@@ -1,0 +1,11 @@
+git clone github.com/meldyer1/ddosultraprotect
+
+cd ddosultraprotect
+
+docker build -t test -f Dockerfile .
+
+docker network create my-net 
+
+docker run -it --network=my-net --name=server1 --hostname=testing test /home/app/examples/proposedAlgLB/server/main.go
+
+docker run --network=my-net --hostname=client test /home/app/examples/proposedAlgLB/client/main.go
