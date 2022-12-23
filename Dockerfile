@@ -18,7 +18,7 @@ ENV CGO_ENABLED=0
 
 RUN go get google.golang.org/grpc/examples/helloworld/helloworld 
 
+EXPOSE 50051
+
 ENTRYPOINT ["go", "run"]
 
-
-EXPOSE 50051
