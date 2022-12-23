@@ -28,6 +28,8 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	
+	pb "github.com/meldyer1/ddosultraprotect/examples/proposedAlgLB/helloworld"
 )
 
 const (
