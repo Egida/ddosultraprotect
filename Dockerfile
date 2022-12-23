@@ -18,6 +18,9 @@ ENV CGO_ENABLED=0
 
 RUN go get google.golang.org/grpc/examples/helloworld/helloworld 
 
+RUN go mod tidy -e
+
+
 ENTRYPOINT ["go", "run"]
 
 
