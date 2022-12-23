@@ -27,4 +27,5 @@ require (
 	github.com/grpc/grpc-proto v0.0.0-20221206173937-2e2e8ebbf4a1 // indirect
 	golang.org/x/text v0.5.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/grpc/examples v0.0.0-20221222230243-0e5421c1e533 // indirect
 )

@@ -31,17 +31,22 @@ var logger = grpclog.Component("proposedLB")
 // taken from rr example
 func newProposedBuilder() balancer.Builder {
 	return base.NewBalancerBuilder(Name, &newLBPickerBuilder{extraParams: keepalive.ServerParameters{
-		MaxConnectionAgeGrace: time.Duration(5 / growthFactor),
-	}}, base.Config{HealthCheck: true})
+		MaxConnectionAgeGrace: time.Duration(10 / growthFactor)}, keepalive.EnforcementPolicy{
+		MinTime: time.Duration(1)
+		},
+	}, base.Config{HealthCheck: true})
 }
 
+
+ 
 // taken from rr example
 func init() {
 	balancer.Register(newProposedBuilder())
 }
 
 type newLBPickerBuilder struct {
-	extraParams keepalive.ServerParameters
+	 extraParams keepalive.ServerParameters
+	 extraParams2 keepalive.EnforcementPolicy
 }
 
 func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
