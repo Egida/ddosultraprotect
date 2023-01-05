@@ -6,8 +6,9 @@ import (
 	"google.golang.org/grpc/benchmark/stats"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/keepalive"
-	"math/rand"
+    "math/rand"
 	"sync/atomic"
+	"math"
 	"time"
 )
 
@@ -27,6 +28,7 @@ var numConnections = 0
 
 // taken from rr example
 var logger = grpclog.Component("proposedLB")
+
 
 // taken from rr example
 func newProposedBuilder() balancer.Builder {
@@ -68,12 +70,12 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		numItemsInBucket = int(intervals.Buckets[k].Count)
 
 		// make it divisible and not infinite.. original RAM capacity must be divisible by the newer and smaller RAM capacity
-		if capacity > 0 && totalCPUsize > 0 && totalCPUsize%smallestCPUsize == 0 {
+		if capacity > 0 && totalCPUsize > 0 && totalCPUsize%smallestCPUsize== 0 {
 			// most important line of code
 			if numItemsInBucket > int(capacity*float64(len(info.ReadySCs))) {
-				numConnections = numConnections + (numItemsInBucket * smallestCPUsize / int(growthFactor*capacity*float64(totalCPUsize)))
+				numConnections = (numItemsInBucket * smallestCPUsize) / int(growthFactor*capacity*float64(totalCPUsize))) + numConnections
 			} else {
-				numConnections = numConnections + (numItemsInBucket * (totalCPUsize / smallestCPUsize))
+				numConnections = (numItemsInBucket *  (totalCPUsize / smallestCPUsize)) + numConnections
 			}
 
 		} else {
@@ -85,10 +87,13 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		}
 	}
 	var scs = make([]balancer.SubConn, 0, numConnections)
-
+	for sc := range numConnections {
+		scs = append(scs, sc)
+	}
+	
 	return &newlbPicker{
 		subConns: scs,
-		next:     uint32(rand.Intn(len(info.ReadySCs))),
+		next:     uint32(rand.Intn(len(scs))),
 	}
 }
 
