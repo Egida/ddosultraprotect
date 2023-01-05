@@ -14,8 +14,8 @@ import (
 // Name taken from rr example
 const Name = "proposedLB"
 
-const smallestCPUsize = 4
-const totalCPUsize = 12
+const totalCPUsize = 8
+const smallestCPUsize = float64(totalCPUsize/10)
 const capacity = float64(60 / 100)
 
 const growthFactor = float64(12 / 100)
@@ -62,7 +62,7 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	intervals := stats.Histogram{
 		Count: int64(len(info.ReadySCs)),
 	}
-
+	
 	for k := range intervals.Buckets {
 		// for each bucket in the histogram, obtain the number of items needed
 		numItemsInBucket = int(intervals.Buckets[k].Count)
@@ -71,9 +71,9 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		if capacity > 0 && totalCPUsize > 0 && totalCPUsize%smallestCPUsize == 0 {
 			// most important line of code
 			if numItemsInBucket > int(capacity*float64(len(info.ReadySCs))) {
-				numConnections = numItemsInBucket * smallestCPUsize / int(growthFactor*capacity*float64(totalCPUsize))
+				numConnections = numConnections + (numItemsInBucket * smallestCPUsize / int(growthFactor*capacity*float64(totalCPUsize)))
 			} else {
-				numConnections = numItemsInBucket * (totalCPUsize / smallestCPUsize)
+				numConnections = numConnections + (numItemsInBucket * (totalCPUsize / smallestCPUsize))
 			}
 
 		} else {
