@@ -1,4 +1,4 @@
-module google.golang.org/grpc
+module github.com/meldyer1/ddosultraprotect
 
 go 1.19
 
