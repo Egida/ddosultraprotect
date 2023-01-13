@@ -1,12 +1,14 @@
 package proposedLB
 
 import (
+	"gonum.org/v1/gonum/optimize"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/benchmark/stats"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/keepalive"
 	"math/rand"
+	"os"
 	"sync/atomic"
 	"time"
 )
@@ -15,7 +17,7 @@ import (
 const Name = "proposedLB"
 
 const totalCPUsize = 8
-const smallestCPUsize = float64(totalCPUsize/10)
+const smallestCPUsize = float64(4)
 const capacity = float64(60 / 100)
 
 const growthFactor = float64(12 / 100)
@@ -25,8 +27,16 @@ var numItemsInBucket = 0
 
 var numConnections = 0
 
+func checkValues() {
+	if capacity < 0 || int(totalCPUsize) < 0 || int(smallestCPUsize) < 4 || int(totalCPUsize)%int(smallestCPUsize) != 0 {
+		os.Exit(1)
+	}
+}
+
+
 // taken from rr example
 var logger = grpclog.Component("proposedLB")
+
 
 // taken from rr example
 func newProposedBuilder() balancer.Builder {
@@ -42,6 +52,7 @@ func newProposedBuilder() balancer.Builder {
  
 // taken from rr example
 func init() {
+	checkValues()
 	balancer.Register(newProposedBuilder())
 }
 
@@ -69,22 +80,24 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		numItemsInBucket = int(intervals.Buckets[k].Count)
 
 		// make it divisible and not infinite.. original RAM capacity must be divisible by the newer and smaller RAM capacity
-		if capacity > 0 && int(totalCPUsize) > 0 && int(totalCPUsize)%int(smallestCPUsize)== 0 {
 			// most important line of code
 			if numItemsInBucket > int(capacity*float64(len(info.ReadySCs))) {
 				numConnections = numConnections + int(float64(numItemsInBucket) * smallestCPUsize) / int(growthFactor*capacity*float64(totalCPUsize))
+
 			} else {
-				numConnections =  numConnections + (numItemsInBucket *  int(float64(totalCPUsize) / smallestCPUsize))
+				numConnections = numConnections + (numItemsInBucket * int(float64(totalCPUsize)/smallestCPUsize))
 			}
-
-		} else {
-			numConnections = 0
-		}
-
-		if len(info.ReadySCs) == 0 {
-			return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
-		}
 	}
+
+	arrNums := make([]float64, 0, numConnections)
+	cg := optimize.CG{
+		Variant: &optimize.FletcherReeves{},
+	}
+	cg.Init(1, numConnections)
+
+
+	numConnections = int(cg.NextDirection(&optimize.Location{X: arrNums}, arrNums))
+
 	var scs = make([]balancer.SubConn, 0, numConnections)
 	//for sc := range make([]int, 0, numConnections) {
 	//	scs = append(scs, sc)
