@@ -6,9 +6,8 @@ import (
 	"google.golang.org/grpc/benchmark/stats"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/keepalive"
-    "math/rand"
+	"math/rand"
 	"sync/atomic"
-	"math"
 	"time"
 )
 
@@ -29,12 +28,12 @@ var numConnections = 0
 // taken from rr example
 var logger = grpclog.Component("proposedLB")
 
-
 // taken from rr example
 func newProposedBuilder() balancer.Builder {
 	return base.NewBalancerBuilder(Name, &newLBPickerBuilder{extraParams: keepalive.ServerParameters{
-		MaxConnectionAgeGrace: time.Duration(10 / growthFactor)}, keepalive.EnforcementPolicy{
-		MinTime: time.Duration(1)
+		MaxConnectionAgeGrace: time.Duration(10 / growthFactor)},
+		extraParams2: keepalive.EnforcementPolicy{
+		MinTime: time.Duration(1),
 		},
 	}, base.Config{HealthCheck: true})
 }
@@ -70,12 +69,12 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		numItemsInBucket = int(intervals.Buckets[k].Count)
 
 		// make it divisible and not infinite.. original RAM capacity must be divisible by the newer and smaller RAM capacity
-		if capacity > 0 && totalCPUsize > 0 && totalCPUsize%smallestCPUsize== 0 {
+		if capacity > 0 && int(totalCPUsize) > 0 && int(totalCPUsize)%int(smallestCPUsize)== 0 {
 			// most important line of code
 			if numItemsInBucket > int(capacity*float64(len(info.ReadySCs))) {
-				numConnections = (numItemsInBucket * smallestCPUsize) / int(growthFactor*capacity*float64(totalCPUsize))) + numConnections
+				numConnections = numConnections + int(float64(numItemsInBucket) * smallestCPUsize) / int(growthFactor*capacity*float64(totalCPUsize))
 			} else {
-				numConnections = (numItemsInBucket *  (totalCPUsize / smallestCPUsize)) + numConnections
+				numConnections =  numConnections + (numItemsInBucket *  int(float64(totalCPUsize) / smallestCPUsize))
 			}
 
 		} else {
@@ -87,9 +86,9 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		}
 	}
 	var scs = make([]balancer.SubConn, 0, numConnections)
-	for sc := range numConnections {
-		scs = append(scs, sc)
-	}
+	//for sc := range make([]int, 0, numConnections) {
+	//	scs = append(scs, sc)
+	//}
 	
 	return &newlbPicker{
 		subConns: scs,
