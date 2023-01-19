@@ -55,11 +55,16 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
 	}
 	
-	scs := make([]balancer.SubConn, 0, len(info.ReadySCs)*2)
+	scs := make([]balancer.SubConn, 0, len(info.ReadySCs))
+	
+	intervals := stats.Histogram{
+				Count: int64(len(info.ReadySCs)),
+	}
 	
 	return &newlbPicker{
 		subConns: scs,
 		next:     uint32(rand.Intn(len(scs))),
+		buckets: intervals,
 	}
 }
 
@@ -70,7 +75,9 @@ type newlbPicker struct {
 	// use grpc methods and avoid using third party libraries
 	subConns []balancer.SubConn
 	
-	next uint32
+	next uint32 
+	
+	buckets stats.Histogram
 	
 	}
 
@@ -79,13 +86,8 @@ func (n *newlbPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) 
 	
 	//subConnsLen := uint32(len(n.subConns))
 	
-	intervals := stats.Histogram{
-				Count: int64(len(info.ReadySCs)),
-	}
-	
 	nextIndex := atomic.AddUint32(&n.next, 1)
 
-	sc := n.subConns[nextIndex%intervals.Buckets[nextIndex%uint32(intervals.Buckets.Count)].Count]
-	return balancer.PickResult{SubConn: sc}, nil
-	
+	sc := n.subConns[rand.Intn(buckets[uint32(buckets.Count)%nextIndex].Count)]
+	return balancer.PickResult{SubConn: sc}, nil	
 }
