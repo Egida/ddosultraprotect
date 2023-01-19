@@ -58,20 +58,16 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 
 	// get count of all sub connections and turn it into a histogram
 	
-	intervals := stats.Histogram{
-				Count: int64(len(info.ReadySCs)),
-	}
-		
 	scs := make([]balancer.SubConn, 0, len(info.ReadySCs))
-		
-	for k:= 0; k <= intervals.Buckets.Count; k++{
-		scs = append(scs, info.ReadySCs[intervals.Buckets[k].Count])
+	
+	for sc := range info.ReadySCs {
+		scs = append(scs, sc)
 	}
 	
 	
 	return &newlbPicker{
 		subConns: scs,
-		next:     uint32(grpcrand.Intn(len(scs))),
+		next:     uint32(rand.Intn(len(scs))),
 	}
 }
 
@@ -86,14 +82,19 @@ type newlbPicker struct {
 	
 	}
 
-func (n newlbPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
+func (n *newlbPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	//Taken from rr algorithm
-	for k := 0; k < 32; k++{
+	
 	subConnsLen := uint32(len(&n.subConns))
-	nextIndex := atomic.AddUint32(&n.next, 1 + intervals.Buckets[k].Count)
-
-	sc := n.subConns[nextIndex%subConnsLen]
-	return balancer.PickResult{SubConn: sc}, nil
+	
+	intervals := stats.Histogram{
+				Count: int64(len(info.ReadySCs)),
 	}
+	
+	for it := range intervals.Buckets{
+		nextIndex := atomic.AddUint32(&n.next, 1 + it.Count)
 
+		sc := n.subConns[nextIndex%subConnsLen]
+		return balancer.PickResult{SubConn: sc}, nil
+	}
 }
