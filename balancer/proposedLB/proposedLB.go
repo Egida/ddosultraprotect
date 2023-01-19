@@ -91,12 +91,6 @@ type newlbPicker struct {
 func (n newlbPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	//Taken from rr algorithm
 	
-	subConnsLen := uint32(len(&n.subConns))
-	nextIndex := atomic.AddUint32(&n.next, 1)
-
-	sc := n.subConns[nextIndex%subConnsLen]
-	return balancer.PickResult{SubConn: sc}, nil
-	
 	for k:= 0; k < 32; k++{
 		subConnsLen := uint32(len(info.ReadySCs))
 		nextIndex := atomic.AddUint32(&n.next, &n.bucketCount[k])
