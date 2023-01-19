@@ -54,16 +54,8 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	if len(info.ReadySCs) == 0 {
 		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
 	}
-	// get sub connections
-
-	// get count of all sub connections and turn it into a histogram
 	
-	scs := make([]balancer.SubConn, 0, len(info.ReadySCs))
-	
-	for sc := range info.ReadySCs {
-		scs = append(scs, sc)
-	}
-	
+	scs := make([]balancer.SubConn, 0, len(info.ReadySCs)*2)
 	
 	return &newlbPicker{
 		subConns: scs,
@@ -85,7 +77,7 @@ type newlbPicker struct {
 func (n *newlbPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	//Taken from rr algorithm
 	
-	subConnsLen := uint32(len(&n.subConns))
+	//subConnsLen := uint32(len(n.subConns))
 	
 	intervals := stats.Histogram{
 				Count: int64(len(info.ReadySCs)),
@@ -93,7 +85,7 @@ func (n *newlbPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) 
 	
 	nextIndex := atomic.AddUint32(&n.next, 1)
 
-	sc := n.subConns[nextIndex%subConnsLen + (subConnsLen - intervals.Buckets[nextIndex%uint32(intervals.Buckets.Count)].Count)]
+	sc := n.subConns[nextIndex%intervals.Buckets[nextIndex%uint32(intervals.Buckets.Count)].Count]
 	return balancer.PickResult{SubConn: sc}, nil
 	
 }
