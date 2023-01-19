@@ -1,6 +1,7 @@
 package proposedLB
 
 import (
+	"gonum.org/v1/gonum/optimize"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/benchmark/stats"
@@ -56,15 +57,16 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	}
 	
 	scs := make([]balancer.SubConn, 0, len(info.ReadySCs))
-	
-	intervals := stats.Histogram{
-				Count: int64(len(info.ReadySCs)),
+
+	cg := optimize.LBFGS{
 	}
+	
+	arrNums := make([]float64, 0, len(info.ReadySCs))
 	
 	return &newlbPicker{
 		subConns: scs,
-		next:    uint32(rand.Intn(len(scs))),
-		buckets: intervals,
+		next: uint32(rand.Intn(len(scs))),
+		res: int(cg.NextDirection(optimize.Location{X: arrNums}, arrNums)),
 	}
 }
 
@@ -74,18 +76,19 @@ type newlbPicker struct {
 	// select from it and return the selected SubConn.
 	// use grpc methods and avoid using third party libraries
 	subConns []balancer.SubConn
+		
+	next uint32
 	
-	next uint32 
-	
-	buckets stats.Histogram
+	res int
 	
 	}
 
 func (n *newlbPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	//Taken from rr algorithm
-		
-	nextIndex := atomic.AddUint32(&n.next, 1)
+	subConnsLen := uint32(len(n.subConns))
 
-	sc := n.subConns[uint32(rand.Intn(buckets.Count))%nextIndex]
+	nextIndex := atomic.AddUint32(&n.res, 1)
+
+	sc := n.subConns[nextIndex%subConnsLen]
 	return balancer.PickResult{SubConn: sc}, nil	
 }
