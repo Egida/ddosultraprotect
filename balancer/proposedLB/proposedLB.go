@@ -91,10 +91,9 @@ func (n *newlbPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) 
 				Count: int64(len(info.ReadySCs)),
 	}
 	
-	for it := range intervals.Buckets{
-		nextIndex := atomic.AddUint32(&n.next, 1 + it.Count)
+	nextIndex := atomic.AddUint32(&n.next, 1)
 
-		sc := n.subConns[nextIndex%subConnsLen]
-		return balancer.PickResult{SubConn: sc}, nil
-	}
+	sc := n.subConns[nextIndex%subConnsLen + (subConnsLen - intervals.Buckets[nextIndex%uint32(intervals.Buckets.Count)].Count)]
+	return balancer.PickResult{SubConn: sc}, nil
+	
 }
