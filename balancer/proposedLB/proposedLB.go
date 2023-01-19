@@ -63,7 +63,7 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	
 	return &newlbPicker{
 		subConns: scs,
-		next:     uint32(rand.Intn(len(scs))),
+		next:    uint32(rand.Intn(len(scs))),
 		buckets: intervals,
 	}
 }
@@ -83,11 +83,9 @@ type newlbPicker struct {
 
 func (n *newlbPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	//Taken from rr algorithm
-	
-	//subConnsLen := uint32(len(n.subConns))
-	
+		
 	nextIndex := atomic.AddUint32(&n.next, 1)
 
-	sc := n.subConns[rand.Intn(buckets[uint32(buckets.Count)%nextIndex].Count)]
+	sc := n.subConns[uint32(rand.Intn(buckets.Count))%nextIndex]
 	return balancer.PickResult{SubConn: sc}, nil	
 }
