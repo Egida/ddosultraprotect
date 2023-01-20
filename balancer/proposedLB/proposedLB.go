@@ -57,7 +57,7 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		Variant:      &optimize.HestenesStiefel{},
 		Linesearcher: &optimize.MoreThuente{},
 	}
-	//cg.Init(1, len(info.ReadySCs))
+	cg.Init(1, len(info.ReadySCs))
 
 	return &newlbPicker{
 		subConns: scs,
