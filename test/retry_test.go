@@ -514,17 +514,17 @@ func (s) TestRetryStats(t *testing.T) {
 	server.start(t, lis)
 	handler := &retryStatsHandler{}
 	cc, err := grpc.Dial(lis.Addr().String(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithStatsHandler(handler),
-		grpc.WithDefaultServiceConfig((`{
-    "methodConfig": [{
-      "name": [{"service": "grpc.testing.TestService"}],
-      "retryPolicy": {
-          "MaxAttempts": 4,
-          "InitialBackoff": ".01s",
-          "MaxBackoff": ".01s",
-          "BackoffMultiplier": 1.0,
-          "RetryableStatusCodes": [ "UNAVAILABLE" ]
-      }
-    }]}`)))
+		grpc.WithDefaultServiceConfig(`{
+			"methodConfig": [{
+			  "name": [{"service": "grpc.testing.TestService"}],
+			  "retryPolicy": {
+				  "MaxAttempts": 4,
+				  "InitialBackoff": ".01s",
+				  "MaxBackoff": ".01s",
+				  "BackoffMultiplier": 1.0,
+				  "RetryableStatusCodes": [ "UNAVAILABLE" ]
+			  }
+			}]}`))
 	if err != nil {
 		t.Fatalf("failed to dial due to err: %v", err)
 	}

@@ -62,7 +62,7 @@ func (s) TestAuthInfoFromContext(t *testing.T) {
 		},
 	} {
 		authInfo, err := AuthInfoFromContext(tc.ctx)
-		if got, want := (err == nil), tc.success; got != want {
+		if got, want := err == nil, tc.success; got != want {
 			t.Errorf("%v: AuthInfoFromContext(_)=(err=nil)=%v, want %v", tc.desc, got, want)
 		}
 		if got, want := authInfo, tc.out; got != want {
@@ -90,7 +90,7 @@ func (s) TestAuthInfoFromPeer(t *testing.T) {
 		},
 	} {
 		authInfo, err := AuthInfoFromPeer(tc.p)
-		if got, want := (err == nil), tc.success; got != want {
+		if got, want := err == nil, tc.success; got != want {
 			t.Errorf("%v: AuthInfoFromPeer(_)=(err=nil)=%v, want %v", tc.desc, got, want)
 		}
 		if got, want := authInfo, tc.out; got != want {
@@ -143,7 +143,7 @@ func (s) TestClientAuthorizationCheck(t *testing.T) {
 		},
 	} {
 		err := ClientAuthorizationCheck(tc.ctx, tc.expectedServiceAccounts)
-		if got, want := (err == nil), tc.success; got != want {
+		if got, want := err == nil, tc.success; got != want {
 			t.Errorf("%v: ClientAuthorizationCheck(_, %v)=(err=nil)=%v, want %v", tc.desc, tc.expectedServiceAccounts, got, want)
 		}
 		if got, want := status.Code(err), tc.code; got != want {

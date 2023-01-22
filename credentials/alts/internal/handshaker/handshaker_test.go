@@ -25,7 +25,7 @@ import (
 	"testing"
 	"time"
 
-	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc"
 	core "google.golang.org/grpc/credentials/alts/internal"
 	altspb "google.golang.org/grpc/credentials/alts/internal/proto/grpc_gcp"
 	"google.golang.org/grpc/credentials/alts/internal/testutil"

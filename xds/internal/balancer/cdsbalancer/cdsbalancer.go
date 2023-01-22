@@ -83,7 +83,7 @@ func (bb) Build(cc balancer.ClientConn, opts balancer.BuildOptions) balancer.Bal
 		done:     grpcsync.NewEvent(),
 		xdsHI:    xdsinternal.NewHandshakeInfo(nil, nil),
 	}
-	b.logger = prefixLogger((b))
+	b.logger = prefixLogger(b)
 	b.logger.Infof("Created")
 	var creds credentials.TransportCredentials
 	switch {

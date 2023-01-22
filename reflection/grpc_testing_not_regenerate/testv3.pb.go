@@ -34,12 +34,12 @@ It has these top-level messages:
 package grpc_testing_not_regenerate
 
 import (
-	context "context"
-	fmt "fmt"
-	math "math"
+	"context"
+	"fmt"
+	"math"
 
-	proto "github.com/golang/protobuf/proto"
-	grpc "google.golang.org/grpc"
+	"github.com/golang/protobuf/proto"
+	"google.golang.org/grpc"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

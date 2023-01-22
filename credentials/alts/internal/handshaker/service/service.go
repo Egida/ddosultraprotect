@@ -23,7 +23,7 @@ package service
 import (
 	"sync"
 
-	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 

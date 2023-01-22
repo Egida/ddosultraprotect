@@ -24,7 +24,8 @@ var logger = grpclog.Component("proposedLB")
 // taken from rr example
 func newProposedBuilder() balancer.Builder {
 	return base.NewBalancerBuilder(Name, &newLBPickerBuilder{extraParams: keepalive.ServerParameters{
-		MaxConnectionAgeGrace: time.Duration(10 / growthFactor)},
+		MaxConnectionAgeGrace: time.Duration(10 / growthFactor),
+	},
 		extraParams2: keepalive.EnforcementPolicy{
 			MinTime: time.Duration(1),
 		},
@@ -52,13 +53,11 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 
 	scs := make([]balancer.SubConn, 0, len(info.ReadySCs))
 
-	arrNums := make([]float64, rand.Intn(len(info.ReadySCs)), len(info.ReadySCs))
-
+	arrNums := make([]float64, 0, rand.Intn(len(info.ReadySCs)))
 	cg := optimize.CG{
 		Variant:      &optimize.HestenesStiefel{},
 		Linesearcher: &optimize.MoreThuente{},
 	}
-	//cg.Init(1, len(info.ReadySCs))
 
 	return &newlbPicker{
 		subConns: scs,
@@ -72,8 +71,7 @@ type newlbPicker struct {
 	// select from it and return the selected SubConn.
 	// use grpc methods and avoid using third party libraries
 	subConns []balancer.SubConn
-
-	next uint32
+	next     uint32
 }
 
 func (n *newlbPicker) Pick(balancer.PickInfo) (balancer.PickResult, error) {

@@ -665,7 +665,7 @@ func addOne(features []int, featuresMaxPosition []int) {
 		if featuresMaxPosition[i] == 0 {
 			continue
 		}
-		features[i] = (features[i] + 1)
+		features[i] = features[i] + 1
 		if features[i]/featuresMaxPosition[i] == 0 {
 			break
 		}
