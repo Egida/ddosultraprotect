@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/keepalive"
+	"math"
 	"math/rand"
 	"sync/atomic"
 	"time"
@@ -56,7 +57,8 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 
 	scs := make([]balancer.SubConn, 0, len(info.ReadySCs))
 
-	arrNums := make([]float64, 0, rand.Intn(len(info.ReadySCs)))
+	interval := math.Min(float64(rand.Intn(len(info.ReadySCs))), float64(len(info.ReadySCs)-rand.Intn(len(info.ReadySCs))))
+	arrNums := make([]float64, 0, interval)
 
 	cg := optimize.CG{
 		Variant:      &optimize.HestenesStiefel{},
