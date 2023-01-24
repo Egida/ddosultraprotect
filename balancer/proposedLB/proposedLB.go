@@ -17,7 +17,7 @@ const Name = "proposedLB"
 
 // initialize variables before calling functions which will change the values
 
-var growthFactor = 6
+var growthFactor = 12
 
 // taken from rr example
 var logger = grpclog.Component("proposedLB")
@@ -31,7 +31,7 @@ func newProposedBuilder() balancer.Builder {
 	},
 		extraParams2: keepalive.EnforcementPolicy{
 			MinTime:             time.Duration(1 / growthFactor),
-			PermitWithoutStream: true,
+			PermitWithoutStream: false,
 		},
 	}, base.Config{HealthCheck: true})
 }
@@ -57,7 +57,7 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 
 	scs := make([]balancer.SubConn, 0, len(info.ReadySCs))
 
-	interval := math.Min(float64(rand.Intn(len(info.ReadySCs))), float64(len(info.ReadySCs)-rand.Intn(len(info.ReadySCs))))
+	interval := math.Min(math.Abs(float64(len(info.ReadySCs)/2-rand.Intn(len(info.ReadySCs)))), math.Abs(float64(len(info.ReadySCs)-rand.Intn(len(info.ReadySCs)))))
 	arrNums := make([]float64, 0, interval)
 
 	cg := optimize.CG{
