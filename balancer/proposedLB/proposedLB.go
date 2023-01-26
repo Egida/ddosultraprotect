@@ -24,11 +24,11 @@ var logger = grpclog.Component("proposedLB")
 // taken from rr example
 func newProposedBuilder() balancer.Builder {
 	return base.NewBalancerBuilder(Name, &newLBPickerBuilder{extraParams: keepalive.ServerParameters{
-		MaxConnectionAge: time.Duration(5.0000e+9), // 5 seconds
-		Timeout:          time.Duration(500000000), // 500 milliseconds
+		MaxConnectionAge: time.Duration(3000000), // 5 seconds
+		Timeout:          time.Duration(3000000), // 500 milliseconds
 	},
 		extraParams2: keepalive.EnforcementPolicy{
-			MinTime:             time.Duration(0),
+			MinTime:             time.Duration(2500000),
 			PermitWithoutStream: false,
 		},
 	}, base.Config{HealthCheck: true})
@@ -54,7 +54,7 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	}
 
 	scs := make([]balancer.SubConn, 0, len(info.ReadySCs))
-	randomNum := rand.Intn(len(info.ReadySCs))
+	randomNum := rand.Intn(len(info.ReadySCs)) / 2
 	diagMat := mat.NewDiagonalRect(randomNum, randomNum, make([]float64, 0, float64(randomNum)))
 
 	var lu mat.LU
