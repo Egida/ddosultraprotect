@@ -20,6 +20,7 @@ require (
 )
 
 require (
+	github.com/cdipaolo/goml v0.0.0-20220715001353-00e0c845ae1c // indirect
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	google.golang.org/grpc/examples v0.0.0-20230120001647-bc9728f98bdc // indirect
 )

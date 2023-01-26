@@ -1,12 +1,11 @@
 package proposedLB
 
 import (
-	"gonum.org/v1/gonum/optimize"
+	"gonum.org/v1/gonum/mat"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/keepalive"
-	"math"
 	"math/rand"
 	"sync/atomic"
 	"time"
@@ -17,7 +16,7 @@ const Name = "proposedLB"
 
 // initialize variables before calling functions which will change the values
 
-var growthFactor = 6
+var growthFactor = 8
 
 // taken from rr example
 var logger = grpclog.Component("proposedLB")
@@ -56,20 +55,22 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	}
 
 	scs := make([]balancer.SubConn, 0, len(info.ReadySCs))
+	randomNum := rand.Intn(len(info.ReadySCs))
+	diagMat := mat.NewDiagonalRect(randomNum, randomNum, make([]float64, 0, float64(randomNum)))
 
-	//interval := math.Min(math.Abs(float64(len(info.ReadySCs)/2-rand.Intn(len(info.ReadySCs)))), math.Abs(float64(len(info.ReadySCs)-rand.Intn(len(info.ReadySCs)))))
-	interval := math.Log(float64(rand.Intn(len(info.ReadySCs))))
+	var lu mat.LU
 
-	arrNums := make([]float64, 0, interval)
+	lu.Factorize(diagMat)
 
-	cg := optimize.CG{
-		Variant:      &optimize.HestenesStiefel{},
-		Linesearcher: &optimize.MoreThuente{},
+	det, sign := lu.LogDet()
+
+	if sign < 0 {
+		logger.Infof("negative sign for determinant")
 	}
 
 	return &newlbPicker{
 		subConns: scs,
-		next:     uint32(cg.NextDirection(&optimize.Location{}, arrNums)),
+		next:     uint32(det),
 	}
 }
 
