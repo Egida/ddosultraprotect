@@ -23,13 +23,15 @@ var logger = grpclog.Component("proposedLB")
 
 // taken from rr example
 func newProposedBuilder() balancer.Builder {
+
+	// gcp keepalive params
 	return base.NewBalancerBuilder(Name, &newLBPickerBuilder{extraParams: keepalive.ServerParameters{
-		MaxConnectionAge: time.Duration(3000000), // 5 seconds
-		Timeout:          time.Duration(3000000), // 500 milliseconds
+		MaxConnectionAge: time.Duration(5000000),
+		Timeout:          time.Duration(4000000),
 	},
 		extraParams2: keepalive.EnforcementPolicy{
 			MinTime:             time.Duration(2500000),
-			PermitWithoutStream: false,
+			PermitWithoutStream: true,
 		},
 	}, base.Config{HealthCheck: true})
 }
