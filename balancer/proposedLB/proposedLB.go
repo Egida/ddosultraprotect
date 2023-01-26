@@ -16,7 +16,7 @@ const Name = "proposedLB"
 
 // initialize variables before calling functions which will change the values
 
-var growthFactor = 8
+//var growthFactor = 8
 
 // taken from rr example
 var logger = grpclog.Component("proposedLB")
@@ -24,12 +24,11 @@ var logger = grpclog.Component("proposedLB")
 // taken from rr example
 func newProposedBuilder() balancer.Builder {
 	return base.NewBalancerBuilder(Name, &newLBPickerBuilder{extraParams: keepalive.ServerParameters{
-		MaxConnectionAgeGrace: time.Duration(2),
-		MaxConnectionAge:      time.Duration(2 / growthFactor),
-		Time:                  time.Duration(1000000), // 1 second
+		MaxConnectionAge: time.Duration(5.0000e+9), // 5 seconds
+		Timeout:          time.Duration(500000000), // 500 milliseconds
 	},
 		extraParams2: keepalive.EnforcementPolicy{
-			MinTime:             time.Duration(1 / growthFactor),
+			MinTime:             time.Duration(0),
 			PermitWithoutStream: false,
 		},
 	}, base.Config{HealthCheck: true})
