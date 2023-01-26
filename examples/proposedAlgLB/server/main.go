@@ -23,12 +23,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	grpc "google.golang.org/grpc"
+	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 	"log"
 	"net"
-
-	"google.golang.org/grpc"
-	pb "google.golang.org/grpc/examples/helloworld/helloworld"
-	
 )
 
 var (

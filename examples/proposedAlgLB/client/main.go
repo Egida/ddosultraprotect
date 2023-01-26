@@ -23,22 +23,26 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	pb "google.golang.org/grpc/examples/helloworld/helloworld"
+	ka "google.golang.org/grpc/keepalive"
 	"log"
 	"time"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	
-	pb "google.golang.org/grpc/examples/proposedAlgLB/helloworld"
 )
 
 const (
-	defaultName = "world"
+	defaultName = "proposedLB"
 )
 
 var (
-	addr = flag.String("addr", "localhost:50051", "the address to connect to")
-	name = flag.String("name", defaultName, "Name to greet")
+	addr   = flag.String("addr", "localhost:50051", "the address to connect to")
+	name   = flag.String("name", defaultName, "Name to greet")
+	params = ka.ClientParameters{
+		Time:                3 * time.Millisecond,
+		Timeout:             6 * time.Millisecond,
+		PermitWithoutStream: true,
+	}
 )
 
 func main() {
@@ -59,13 +63,15 @@ func main() {
          }
       }
    ]
-}`),
+}`), grpc.WithKeepaliveParams(params),
 	)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
+
+	// Pass the struct to SetKeepAliveParams()
 
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)

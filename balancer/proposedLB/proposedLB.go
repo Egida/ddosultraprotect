@@ -5,10 +5,8 @@ import (
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/grpclog"
-	"google.golang.org/grpc/keepalive"
 	"math/rand"
 	"sync/atomic"
-	"time"
 )
 
 // Name taken from rr example
@@ -25,15 +23,7 @@ var logger = grpclog.Component("proposedLB")
 func newProposedBuilder() balancer.Builder {
 
 	// gcp keepalive params
-	return base.NewBalancerBuilder(Name, &newLBPickerBuilder{extraParams: keepalive.ServerParameters{
-		MaxConnectionAge: time.Duration(5000000),
-		Timeout:          time.Duration(4000000),
-	},
-		extraParams2: keepalive.EnforcementPolicy{
-			MinTime:             time.Duration(2500000),
-			PermitWithoutStream: true,
-		},
-	}, base.Config{HealthCheck: true})
+	return base.NewBalancerBuilder(Name, &newLBPickerBuilder{}, base.Config{HealthCheck: true})
 }
 
 // taken from rr example
@@ -42,8 +32,6 @@ func init() {
 }
 
 type newLBPickerBuilder struct {
-	extraParams  keepalive.ServerParameters
-	extraParams2 keepalive.EnforcementPolicy
 }
 
 func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {

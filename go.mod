@@ -8,19 +8,19 @@ require (
 	github.com/cncf/xds/go v0.0.0-20230105202645-06c439db220b
 	github.com/envoyproxy/go-control-plane v0.10.3
 	github.com/golang/glog v1.0.0
-	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	golang.org/x/net v0.5.0
 	golang.org/x/oauth2 v0.4.0
 	golang.org/x/sys v0.4.0
-	google.golang.org/grpc v1.52.0
+	google.golang.org/grpc v1.52.3
 	google.golang.org/protobuf v1.28.1
 
 )
 
 require (
 	github.com/cdipaolo/goml v0.0.0-20220715001353-00e0c845ae1c // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	google.golang.org/grpc/examples v0.0.0-20230120001647-bc9728f98bdc // indirect
 )
