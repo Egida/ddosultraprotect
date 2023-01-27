@@ -1,9 +1,9 @@
 package proposedLB
 
 import (
-	"gonum.org/v1/gonum/mat"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
+	"google.golang.org/grpc/benchmark/stats"
 	"google.golang.org/grpc/grpclog"
 	"math/rand"
 	"sync/atomic"
@@ -38,28 +38,19 @@ func (*newLBPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	// specify method used to choose the load balancer here
 	// lines below are taken from rr example
 	logger.Infof("proposedLB: Build called with info: %v", info)
-
-	if len(info.ReadySCs) == 0 {
+	allSCs := len(info.ReadySCs)
+	const bucketsCount = 32
+	if allSCs == 0 {
 		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
 	}
 
-	scs := make([]balancer.SubConn, 0, len(info.ReadySCs))
-	randomNum := rand.Intn(len(info.ReadySCs)) / 2
-	diagMat := mat.NewDiagonalRect(randomNum, randomNum, make([]float64, 0, float64(randomNum)))
-
-	var lu mat.LU
-
-	lu.Factorize(diagMat)
-
-	det, sign := lu.LogDet()
-
-	if sign < 0 {
-		logger.Infof("negative sign for determinant")
-	}
+	scs := make([]balancer.SubConn, allSCs)
 
 	return &newlbPicker{
 		subConns: scs,
-		next:     uint32(det),
+		next: int64(stats.Histogram{
+			Count: int64(rand.Intn(allSCs)),
+		}.Buckets[rand.Intn(bucketsCount)].LowBound),
 	}
 }
 
@@ -69,14 +60,14 @@ type newlbPicker struct {
 	// select from it and return the selected SubConn.
 	// use grpc methods and avoid using third party libraries
 	subConns []balancer.SubConn
-	next     uint32
+	next     int64
 }
 
 func (n *newlbPicker) Pick(balancer.PickInfo) (balancer.PickResult, error) {
 	//Taken from rr algorithm
-	subConnsLen := uint32(len(n.subConns))
+	subConnsLen := int64(len(n.subConns))
 
-	nextIndex := atomic.AddUint32(&n.next, 1)
+	nextIndex := atomic.AddInt64(&n.next, 1)
 
 	sc := n.subConns[nextIndex%subConnsLen]
 	return balancer.PickResult{SubConn: sc}, nil
