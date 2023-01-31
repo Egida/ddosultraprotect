@@ -19,6 +19,7 @@ require (
 )
 
 require (
+	github.com/aws/aws-lambda-go v1.37.0 // indirect
 	github.com/cdipaolo/goml v0.0.0-20220715001353-00e0c845ae1c // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
