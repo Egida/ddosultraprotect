@@ -1,11 +1,34 @@
-git clone github.com/meldyer1/ddosultraprotect
+Prerequisites:
+1. Download Go: https://go.dev/dl/
+2. Download the ghz testing tool : https://ghz.sh/
+3. 16 or 32 GB RAM 
 
+Experiment: 
+
+1. Enter the commands on the command line: 
+git clone https://github.com/meldyer1/ddosultraprotect.git
 cd ddosultraprotect
+go get .
 
-docker build -t test -f Dockerfile .
+2. If you are on windows, enter:
+go run examples\proposedAlgLB\server\main.go
 
-docker network create my-net 
+3. If you are on linux, enter:
+go run examples/proposedAlgLB/server/main.go
 
-docker run -it --network=my-net --name=server1 --hostname=testing test /home/app/examples/proposedAlgLB/server/main.go
+4. If you encounter any issues, copy, paste and enter the command seen in the error message.
 
-docker run --network=my-net --hostname=client test /home/app/examples/proposedAlgLB/client/main.go
+5. Open a new tab on the command line
+
+6. Navigate to the directory where the ghz testing executable is.
+
+7. Run the following command, if you have linux (alter values for your laptop or PC):
+ .\ghz --proto="<project directory>/examples/proposedAlgLB/helloworld/helloworld.proto" --insecure --async --rps=1000 --concurrency=41 --output="<your directory>/ghz_output.html" --format="html" --cpus=6  --call helloworld.Greeter.SayHello -D "<project directory>/examples/proposedAlgLB/test.json"  --lb-strategy="proposedLB" localhost:50051
+ 
+ 8. 7. Run the following command, if you have windows (alter values for your laptop or PC):
+ .\ghz --proto="<project directory>\examples\proposedAlgLB\helloworld\helloworld.proto" --insecure --async --rps=1000 --concurrency=41 --output="<your directory>\ghz_output.html" --format="html" --cpus=6  --call helloworld.Greeter.SayHello -D "<project directory>\examples\proposedAlgLB\test.json"  --lb-strategy="proposedLB" localhost:50051
+ 
+ 9. Open ghz_output.html and fill out your evaluation of the algorithm on surveymonkey.
+ 
+
+
